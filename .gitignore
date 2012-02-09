@@ -2,3 +2,5 @@ cache/*
 log/*
 nbproject
 lib/vendor/symfony
+/plugins/.registry/
+/plugins/.channels/
