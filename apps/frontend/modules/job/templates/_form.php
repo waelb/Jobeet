@@ -5,7 +5,7 @@
   <?php if (!$form->getObject()->isNew()): ?>
     <input type="hidden" name="sf_method" value="put" />
   <?php endif; ?>
-  <?php echo form_tag_for($form, '@job') ?>
+  
   <table id="job_form">
     <tfoot>
       <tr>
