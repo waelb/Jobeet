@@ -1,0 +1,8 @@
+sfGuardUser:
+  admin:
+    email_address: wael.benamor@gmail.com
+    username: admin
+    password: admin
+    first_name: wael
+    last_name: ben amor
+    is_super_admin: true
