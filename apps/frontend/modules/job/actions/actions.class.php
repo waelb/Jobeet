@@ -14,14 +14,32 @@ class jobActions extends sfActions
   public function executeIndex(sfWebRequest $request)
   {
     //
-    //$this->jobeet_jobs = Doctrine_Core::getTable('JobeetJob')->getActiveJobs();
+    $this->jobeet_jobs = Doctrine_Core::getTable('JobeetJob')->getActiveJobs();
+    $this->categories = Doctrine_Core::getTable('JobeetCategory')->getWithJobs();
+
+    if (!$request->getParameter('sf_culture'))
+    {
+      if ($this->getUser()->isFirstRequest())
+      {
+        $culture = $request->getPreferredCulture(array('en', 'fr'));
+        $this->getUser()->setCulture($culture);
+        $this->getUser()->isFirstRequest(false);
+      }
+      else
+      {
+        $culture = $this->getUser()->getCulture();
+      }
+
+      $this->redirect('localized_homepage');
+    }
+
     $this->categories = Doctrine_Core::getTable('JobeetCategory')->getWithJobs();
   }
 
   public function executeShow(sfWebRequest $request)
   {
     $this->job = $this->getRoute()->getObject();
- 
+
     $this->getUser()->addJobToHistory($this->job);
   }
 
@@ -87,7 +105,7 @@ class jobActions extends sfActions
 
     $this->redirect('job_show_user', $job);
   }
-  
+
   public function executeExtend(sfWebRequest $request)
   {
     $request->checkCSRFProtection();
@@ -98,6 +116,23 @@ class jobActions extends sfActions
     $this->getUser()->setFlash('notice', sprintf('Your job validity has been extended until %s.', $job->getDateTimeObject('expires_at')->format('m/d/Y')));
 
     $this->redirect($this->generateUrl('job_show_user', $job));
+  }
+
+  public function executeSearch(sfWebRequest $request)
+  {
+    $this->forwardUnless($query = $request->getParameter('query'), 'job', 'index');
+
+    $this->jobs = Doctrine_Core::getTable('JobeetJob')->getForLuceneQuery($query);
+
+    if ($request->isXmlHttpRequest())
+    {
+      if ('*' == $query || !$this->jobs)
+      {
+        return $this->renderText('No results.');
+      }
+
+      return $this->renderPartial('job/list', array('jobs' => $this->jobs));
+    }
   }
 
 }
